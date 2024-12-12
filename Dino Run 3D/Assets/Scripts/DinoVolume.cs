@@ -25,12 +25,12 @@ public class DinoVolume : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.UpArrow) && dinoManager.isPaused)
+        if (Input.GetKeyDown(KeyCode.RightArrow) && dinoManager.isPaused)
         {
             SetVolume(currentVolume + 1); // Increase volume
             PlayVolumeChangeSound();
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow) && dinoManager.isPaused)
+        else if (Input.GetKeyDown(KeyCode.LeftArrow) && dinoManager.isPaused)
         {
             SetVolume(currentVolume - 1); // Decrease volume
             PlayVolumeChangeSound();
