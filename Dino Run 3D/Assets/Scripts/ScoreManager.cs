@@ -5,7 +5,7 @@ public class ScoreManager : MonoBehaviour
     public GameObject[] numberModels; // Assign your number models in the inspector
     private float startTime;
     private int currentScore;
-    private int highScore;
+    public int highScore;
     private bool isGameActive;
     public bool hasStarted; // Track if scoring has started
 
@@ -54,7 +54,7 @@ public class ScoreManager : MonoBehaviour
         UpdateScore(); // Update the displayed score
     }
 
-    void UpdateScore()
+    public void UpdateScore()
     {
         // Clear old score models
         foreach (Transform child in transform)
