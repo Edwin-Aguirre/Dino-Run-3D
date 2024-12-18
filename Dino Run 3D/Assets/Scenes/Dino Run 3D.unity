@@ -1267,6 +1267,10 @@ MonoBehaviour:
   - {fileID: 1006337449}
   - {fileID: 157037741}
   - {fileID: 46951893}
+  sectionColliders:
+  - {fileID: 1117602620}
+  - {fileID: 1743993577}
+  - {fileID: 878378628}
   snapPositions:
   - -0.875
   - -5
@@ -3817,6 +3821,7 @@ GameObject:
   - component: {fileID: 878378625}
   - component: {fileID: 878378624}
   - component: {fileID: 878378627}
+  - component: {fileID: 878378628}
   m_Layer: 0
   m_Name: Reset Score
   m_TagString: Untagged
@@ -3999,6 +4004,27 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!65 &878378628
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 878378622}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15, y: 1.75, z: 1}
+  m_Center: {x: 0, y: 0.875, z: 0}
 --- !u!43 &880211726
 Mesh:
   m_ObjectHideFlags: 0
@@ -5006,6 +5032,7 @@ GameObject:
   - component: {fileID: 1117602617}
   - component: {fileID: 1117602618}
   - component: {fileID: 1117602619}
+  - component: {fileID: 1117602620}
   m_Layer: 0
   m_Name: Audio Volume
   m_TagString: Untagged
@@ -5072,6 +5099,27 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!65 &1117602620
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1117602616}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15.75, y: 1.8, z: 1}
+  m_Center: {x: 13.75, y: 0, z: -5}
 --- !u!1 &1141789636
 GameObject:
   m_ObjectHideFlags: 0
@@ -6234,7 +6282,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1713127402}
+  m_Father: {fileID: 1743993576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1307605423
 MonoBehaviour:
@@ -7451,10 +7499,9 @@ Transform:
   - {fileID: 1391600191}
   - {fileID: 1718528784}
   - {fileID: 1146173898}
-  - {fileID: 1736092274}
-  - {fileID: 1307605422}
-  - {fileID: 878378623}
   - {fileID: 1117602617}
+  - {fileID: 1743993576}
+  - {fileID: 878378623}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1713127403
@@ -7755,7 +7802,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1713127402}
+  m_Father: {fileID: 1743993576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1736092275
 MonoBehaviour:
@@ -7915,6 +7962,61 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &1743993575
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1743993576}
+  - component: {fileID: 1743993577}
+  m_Layer: 0
+  m_Name: Game Window
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1743993576
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743993575}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1736092274}
+  - {fileID: 1307605422}
+  m_Father: {fileID: 1713127402}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1743993577
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743993575}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15, y: 1.75, z: 1}
+  m_Center: {x: 13.4, y: -4, z: -5}
 --- !u!28 &1810097433
 Texture2D:
   m_ObjectHideFlags: 0

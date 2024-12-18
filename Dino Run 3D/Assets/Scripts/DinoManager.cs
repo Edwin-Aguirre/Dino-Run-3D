@@ -3,66 +3,65 @@ using UnityEngine.UI;
 
 public class DinoManager : MonoBehaviour
 {
-    private ScoreManager scoreManager;
-    private DinoDie dinoDie;
-    private DinoAnimations dinoAnimations;
+    private ScoreManager scoreManager;  // Manages the player's score
+    private DinoDie dinoDie;  // Handles the Dino's death logic
+    private DinoAnimations dinoAnimations;  // Controls animations for the Dino
 
+    // Serialized fields for various UI elements that can be configured in the Inspector
     [SerializeField]
-    private GameObject title;
-
+    private GameObject title;  // Title screen UI
     [SerializeField]
-    private GameObject pause;
-
+    private GameObject pause;  // Pause menu UI
     [SerializeField]
-    private GameObject arrow;
-
+    private GameObject arrow;  // Arrow that moves in the menu
     [SerializeField]
-    private GameObject fullScreen;
-
+    private GameObject fullScreen;  // UI element for fullscreen mode
     [SerializeField]
-    private GameObject windowed;
-
+    private GameObject windowed;  // UI element for windowed mode
     [SerializeField]
-    private GameObject resetScore;
-
+    private GameObject resetScore;  // UI element for score reset option
     [SerializeField]
-    private Image resetScoreImage;
-
+    private Image resetScoreImage;  // Image used to visualize reset score progress
     [SerializeField]
-    private GameObject hold;
-
+    private GameObject hold;  // UI element showing "hold" message
     [SerializeField]
-    private GameObject[] hideObjects;
+    private GameObject[] hideObjects;  // Objects to hide when the game starts
 
-    // The predefined positions the arrow can snap to
-    public float[] snapPositions = { 0f, -5f, -10f };  // Customize these positions as needed
-    private int currentSnapIndex = 0;  // Keep track of the current snap position
+    // Colliders for different menu sections that the arrow can snap to
+    public BoxCollider[] sectionColliders;
 
-    private bool isMoving = false;  // Flag to prevent multiple movement inputs at the same time
-    public bool isPaused = false;
-    public bool canAdjustVolume = false;
+    // Predefined Y positions the arrow can snap to in the menu
+    public float[] snapPositions = { -0.875f, -5f, 5f };
+    private int currentSnapIndex = 0;  // Index to track the current snap position
 
-    // Timer variables for holding the Enter key
-    private float enterHoldTime = 0f;  // Time the player has held Enter
-    private bool isHoldingEnter = false;  // Flag to track if Enter key is being held
-    private bool gameWindowMode = false;
-    private bool resetScoreMode = false;
+    // Flags and variables related to the pause and input management
+    private bool isMoving = false;  // Prevents multiple movement inputs at once
+    public bool isPaused = false;  // Checks if the game is paused
+    public bool canAdjustVolume = false;  // Indicates if volume can be adjusted
 
-    // Store the resolution and window size for windowed mode
+    // Timer variables to track how long the Enter key is held down for
+    private float enterHoldTime = 0f;  // Time the Enter key has been held
+    private bool isHoldingEnter = false;  // Flag to track Enter key being held
+    private bool gameWindowMode = false;  // Flag for fullscreen/windowed mode toggle
+    private bool resetScoreMode = false;  // Flag for score reset mode
+
+    // Store windowed resolution for later use
     private int windowedWidth;
     private int windowedHeight;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Initialize references to other game systems
         scoreManager = FindAnyObjectByType<ScoreManager>();
         dinoDie = FindAnyObjectByType<DinoDie>();
         dinoAnimations = FindAnyObjectByType<DinoAnimations>();
 
+        // Set initial game UI states
         title.SetActive(true);
         pause.SetActive(false);
         isPaused = false;
 
+        // Hide game objects at the start
         foreach (var objects in hideObjects)
         {
             objects.SetActive(false);
@@ -76,9 +75,9 @@ public class DinoManager : MonoBehaviour
         windowedHeight = Screen.height;
     }
 
-    // Update is called once per frame
     void Update()
     {
+        // Start the game when space or left-click is pressed, if the game isn't paused
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
             if (!scoreManager.hasStarted && !isPaused)
@@ -87,6 +86,7 @@ public class DinoManager : MonoBehaviour
                 scoreManager.hasStarted = true;
                 title.SetActive(false);
 
+                // Show game objects once the game starts
                 foreach (var objects in hideObjects)
                 {
                     objects.SetActive(true);
@@ -94,67 +94,68 @@ public class DinoManager : MonoBehaviour
             }
         }
 
+        // Pause or resume the game when Escape is pressed
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if(isPaused)
+            if (isPaused)
             {
-                Resume();
+                Resume();  // Resume the game if it's paused
                 if (!scoreManager.hasStarted)
                 {
-                    title.SetActive(true);
+                    title.SetActive(true);  // Show title screen if game hasn't started
                 }
             }
             else
             {
-                if (dinoDie.hasDied == false)
+                if (!dinoDie.hasDied)
                 {
-                    Pause();
+                    Pause();  // Pause the game if the Dino hasn't died
                 }
             }
         }
 
-        // Continuously check for the arrow movement when the game is paused
+        // Handle input and actions when the game is paused
         if (isPaused)
         {
-            MenuIndicator();
-            CheckForVolumeAdjustment();
-            CheckForFullscreenToggle();
-            CheckForResetScore();
+            MenuIndicator();  // Move the arrow and handle UI navigation
+            CheckForVolumeAdjustment();  // Check if the player is on the volume section
+            CheckForFullscreenToggle();  // Check if the player is on the fullscreen section
+            CheckForResetScore();  // Check if the player is on the reset score section
         }
 
-        // Track the Enter key holding time
+        // Handle holding Enter for 3 seconds to trigger fullscreen or reset score
         if (isHoldingEnter)
         {
-            enterHoldTime += Time.unscaledDeltaTime;  // Use unscaledDeltaTime to prevent time scale issues
-            if (enterHoldTime >= 3f && gameWindowMode)  // 3 seconds reached
+            enterHoldTime += Time.unscaledDeltaTime;  // Track how long Enter is held
+            if (enterHoldTime >= 3f && gameWindowMode)
             {
-                ToggleFullscreen();
-                isHoldingEnter = false;  // Reset flag after action is triggered
+                ToggleFullscreen();  // Toggle fullscreen after 3 seconds
+                isHoldingEnter = false;  // Reset flag
             }
             if (enterHoldTime >= 3f && resetScoreMode)
             {
-                ToggleResetScore();
-                isHoldingEnter = false;  // Reset flag after action is triggered
+                ToggleResetScore();  // Reset score after 3 seconds
+                isHoldingEnter = false;  // Reset flag
             }
 
+            // Update reset score animation based on the time the Enter key has been held
             resetScoreImage.fillAmount = Mathf.Clamp01(enterHoldTime / 3f);
             dinoAnimations.PlayResetScoreShakeAnimation();
         }
 
-        // Reset the timer if Enter key is released
-        if (Input.GetKeyUp(KeyCode.Return))
+        // Reset Enter key holding state when the key is released
+        if (Input.GetKeyUp(KeyCode.Return) || Input.GetMouseButtonUp(0))
         {
             isHoldingEnter = false;
             enterHoldTime = 0f;
 
-            // Reset the fill amount when the key is released
+            // Reset the fill amount of the reset score image when the key is released
             resetScoreImage.fillAmount = 0f;
-
             dinoAnimations.PlayResetScoreAnimation();
         }
 
-        // Update fullscreen toggle with a single press of Enter key
-        if (Input.GetKeyDown(KeyCode.Return))
+        // Single press of Enter to toggle fullscreen
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))
         {
             if (gameWindowMode)  // Only toggle fullscreen if the arrow is at the correct position
             {
@@ -163,6 +164,7 @@ public class DinoManager : MonoBehaviour
         }
     }
 
+    // Pause the game, show the pause menu, and stop time
     void Pause()
     {
         pause.SetActive(true);
@@ -170,10 +172,11 @@ public class DinoManager : MonoBehaviour
         fullScreen.SetActive(!Screen.fullScreen);
         windowed.SetActive(Screen.fullScreen);
         resetScore.SetActive(true);
-        Time.timeScale = 0f;
+        Time.timeScale = 0f;  // Pause the game by setting time scale to 0
         isPaused = true;
     }
 
+    // Resume the game, hide the pause menu, and restart time
     void Resume()
     {
         pause.SetActive(false);
@@ -181,24 +184,43 @@ public class DinoManager : MonoBehaviour
         fullScreen.SetActive(false);
         windowed.SetActive(false);
         resetScore.SetActive(false);
-        Time.timeScale = 1f;
+        Time.timeScale = 1f;  // Resume normal time flow
         isPaused = false;
 
-        // Reset the position of the arrow if needed
-        arrow.transform.localPosition = new Vector3(4, arrow.transform.localPosition.y, arrow.transform.localPosition.z);  // Set to a known position
+        // Reset the position of the arrow when resuming
+        arrow.transform.localPosition = new Vector3(4, arrow.transform.localPosition.y, arrow.transform.localPosition.z);
     }
 
+    // Handle the movement of the arrow in the menu
     void MenuIndicator()
     {
-        // Make sure the arrow is visible when the menu is active
+        // Show the arrow when the menu is active
         arrow.SetActive(true);
 
-        if (isMoving) return;  // Prevent further input if the arrow is already moving to a snap position
+        if (isMoving) return;  // Prevent input if the arrow is already moving
 
-        // Check for key press to snap to new position
+        // Raycast to detect mouse hover over a section and snap the arrow to the section
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            // Snap the arrow to the correct position based on which section the mouse is hovering over
+            for (int i = 0; i < sectionColliders.Length; i++)
+            {
+                if (hit.collider == sectionColliders[i])
+                {
+                    currentSnapIndex = i;
+                    StartCoroutine(SnapToPosition(snapPositions[currentSnapIndex]));  // Snap to the new position
+                    break;
+                }
+            }
+        }
+
+        // Arrow movement with keyboard input (Up/Down arrow keys)
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            // If not at the bottom position, move to the next one
+            // Move the arrow down if not already at the bottom position
             if (currentSnapIndex < snapPositions.Length - 1)
             {
                 currentSnapIndex++;
@@ -208,7 +230,7 @@ public class DinoManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            // If not at the top position, move to the previous one
+            // Move the arrow up if not already at the top position
             if (currentSnapIndex > 0)
             {
                 currentSnapIndex--;
@@ -217,33 +239,32 @@ public class DinoManager : MonoBehaviour
         }
     }
 
-    // Coroutine to smoothly snap to a new position
+    // Coroutine to smoothly snap the arrow to the target position
     private System.Collections.IEnumerator SnapToPosition(float targetY)
     {
-        isMoving = true;
+        isMoving = true;  // Prevent further movement while animating
 
         float startY = arrow.transform.localPosition.y;
         float elapsedTime = 0f;
-        float duration = 0.2f;  // Duration of the snapping animation
+        float duration = 0.2f;  // Duration of the snap animation
 
+        // Animate the arrow's movement over time
         while (elapsedTime < duration)
         {
-            elapsedTime += Time.unscaledDeltaTime;  // Use unscaled time for smooth movement
+            elapsedTime += Time.unscaledDeltaTime;
             float newY = Mathf.Lerp(startY, targetY, elapsedTime / duration);
             arrow.transform.localPosition = new Vector3(arrow.transform.localPosition.x, newY, arrow.transform.localPosition.z);
-            yield return null;
+            yield return null;  // Wait until the next frame
         }
 
-        // Ensure the final position is set precisely
+        // Ensure the arrow's final position is set precisely
         arrow.transform.localPosition = new Vector3(arrow.transform.localPosition.x, targetY, arrow.transform.localPosition.z);
-
-        isMoving = false;  // Allow the arrow to be moved again
+        isMoving = false;  // Allow movement again
     }
 
-    // Check if the arrow is at a specific position
+    // Check if the player is on the volume adjustment section
     private void CheckForVolumeAdjustment()
     {
-        // If the arrow is at position
         if (arrow.transform.localPosition.y == -0.875f)
         {
             canAdjustVolume = true;
@@ -256,10 +277,9 @@ public class DinoManager : MonoBehaviour
         }
     }
 
-    // Check if the arrow is at a specific position
+    // Check if the player is on the fullscreen toggle section
     private void CheckForFullscreenToggle()
     {
-        // If the arrow is at position
         if (arrow.transform.localPosition.y == -5f)
         {
             gameWindowMode = true;
@@ -274,48 +294,43 @@ public class DinoManager : MonoBehaviour
         }
     }
 
-    // Toggle fullscreen mode
+    // Toggle fullscreen mode on or off
     private void ToggleFullscreen()
     {
         if (Screen.fullScreen)
         {
-            // If currently in fullscreen mode, switch to windowed mode and restore window size
-            Screen.SetResolution(windowedWidth, windowedHeight, false);  // Set the stored windowed resolution
+            Screen.SetResolution(windowedWidth, windowedHeight, false);  // Switch to windowed mode
             fullScreen.SetActive(true);
             windowed.SetActive(false);
         }
         else
         {
-            // Store current resolution before switching to fullscreen
             windowedWidth = Screen.width;
             windowedHeight = Screen.height;
-
-            // Switch to fullscreen mode at native resolution
             Resolution currentResolution = Screen.currentResolution;
-            Screen.SetResolution(currentResolution.width, currentResolution.height, true);
+            Screen.SetResolution(currentResolution.width, currentResolution.height, true);  // Switch to fullscreen mode
             fullScreen.SetActive(false);
             windowed.SetActive(true);
         }
     }
 
-    // Check if the arrow is at a specific position
+    // Check if the player is on the reset score section
     private void CheckForResetScore()
     {
-        // If the arrow is at position
         if (arrow.transform.localPosition.y == -8.85f)
         {
             resetScoreMode = true;
             hold.SetActive(true);
-            
-            if (isHoldingEnter == false)
+
+            if (!isHoldingEnter)
             {
                 dinoAnimations.PlayResetScoreAnimation();
             }
 
-            // Trigger fullscreen toggle if Enter is being held
-            if (Input.GetKeyDown(KeyCode.Return))
+            // Begin holding Enter to reset score
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))
             {
-                isHoldingEnter = true;  // Start holding Enter
+                isHoldingEnter = true;
             }
         }
         else
@@ -323,20 +338,19 @@ public class DinoManager : MonoBehaviour
             resetScoreMode = false;
             hold.SetActive(false);
 
-            if (isHoldingEnter == false)
+            // Stop reset score animation if not holding Enter
+            if (!isHoldingEnter)
             {
                 dinoAnimations.StopResetScoreAnimation();
             }
         }
     }
 
-    // Toggle reset score
+    // Reset the player's score
     private void ToggleResetScore()
     {
-        // Toggle the reset score
-        PlayerPrefs.DeleteKey("HighScore");
-        scoreManager.ResetScore();
-        scoreManager.highScore = 0;
-        Debug.Log("Score has been reset");
+        PlayerPrefs.DeleteKey("HighScore");  // Delete the saved high score
+        scoreManager.ResetScore();  // Reset the current score
+        scoreManager.highScore = 0;  // Set high score to 0
     }
 }
