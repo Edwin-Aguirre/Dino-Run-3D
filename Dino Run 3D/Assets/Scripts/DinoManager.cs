@@ -1,9 +1,11 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DinoManager : MonoBehaviour
 {
     private ScoreManager scoreManager;
     private DinoDie dinoDie;
+    private DinoAnimations dinoAnimations;
 
     [SerializeField]
     private GameObject title;
@@ -22,6 +24,12 @@ public class DinoManager : MonoBehaviour
 
     [SerializeField]
     private GameObject resetScore;
+
+    [SerializeField]
+    private Image resetScoreImage;
+
+    [SerializeField]
+    private GameObject hold;
 
     [SerializeField]
     private GameObject[] hideObjects;
@@ -43,13 +51,13 @@ public class DinoManager : MonoBehaviour
     // Store the resolution and window size for windowed mode
     private int windowedWidth;
     private int windowedHeight;
-    private bool isWindowedMode = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         scoreManager = FindAnyObjectByType<ScoreManager>();
         dinoDie = FindAnyObjectByType<DinoDie>();
+        dinoAnimations = FindAnyObjectByType<DinoAnimations>();
 
         title.SetActive(true);
         pause.SetActive(false);
@@ -128,6 +136,9 @@ public class DinoManager : MonoBehaviour
                 ToggleResetScore();
                 isHoldingEnter = false;  // Reset flag after action is triggered
             }
+
+            resetScoreImage.fillAmount = Mathf.Clamp01(enterHoldTime / 3f);
+            dinoAnimations.PlayResetScoreShakeAnimation();
         }
 
         // Reset the timer if Enter key is released
@@ -135,6 +146,20 @@ public class DinoManager : MonoBehaviour
         {
             isHoldingEnter = false;
             enterHoldTime = 0f;
+
+            // Reset the fill amount when the key is released
+            resetScoreImage.fillAmount = 0f;
+
+            dinoAnimations.PlayResetScoreAnimation();
+        }
+
+        // Update fullscreen toggle with a single press of Enter key
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (gameWindowMode)  // Only toggle fullscreen if the arrow is at the correct position
+            {
+                ToggleFullscreen();
+            }
         }
     }
 
@@ -222,10 +247,12 @@ public class DinoManager : MonoBehaviour
         if (arrow.transform.localPosition.y == -0.875f)
         {
             canAdjustVolume = true;
+            dinoAnimations.PlayVolumeAnimation();
         }
         else
         {
             canAdjustVolume = false;
+            dinoAnimations.StopVolumeAnimation();
         }
     }
 
@@ -236,16 +263,14 @@ public class DinoManager : MonoBehaviour
         if (arrow.transform.localPosition.y == -5f)
         {
             gameWindowMode = true;
-
-            // Trigger fullscreen toggle if Enter is being held
-            if (Input.GetKeyDown(KeyCode.Return))
-            {
-                isHoldingEnter = true;  // Start holding Enter
-            }
+            dinoAnimations.PlayFullscreenAnimation();
+            dinoAnimations.PlayWindowedAnimation();
         }
         else
         {
             gameWindowMode = false;
+            dinoAnimations.StopFullscreenAnimation();
+            dinoAnimations.StopWindowedAnimation();
         }
     }
 
@@ -256,8 +281,8 @@ public class DinoManager : MonoBehaviour
         {
             // If currently in fullscreen mode, switch to windowed mode and restore window size
             Screen.SetResolution(windowedWidth, windowedHeight, false);  // Set the stored windowed resolution
-            fullScreen.SetActive(false);
-            windowed.SetActive(true);
+            fullScreen.SetActive(true);
+            windowed.SetActive(false);
         }
         else
         {
@@ -268,12 +293,9 @@ public class DinoManager : MonoBehaviour
             // Switch to fullscreen mode at native resolution
             Resolution currentResolution = Screen.currentResolution;
             Screen.SetResolution(currentResolution.width, currentResolution.height, true);
-            fullScreen.SetActive(true);
-            windowed.SetActive(false);
+            fullScreen.SetActive(false);
+            windowed.SetActive(true);
         }
-
-        // Optionally, you can add a log message to verify it's working
-        Debug.Log("Fullscreen mode is now: " + (Screen.fullScreen ? "Enabled" : "Disabled"));
     }
 
     // Check if the arrow is at a specific position
@@ -283,6 +305,12 @@ public class DinoManager : MonoBehaviour
         if (arrow.transform.localPosition.y == -8.85f)
         {
             resetScoreMode = true;
+            hold.SetActive(true);
+            
+            if (isHoldingEnter == false)
+            {
+                dinoAnimations.PlayResetScoreAnimation();
+            }
 
             // Trigger fullscreen toggle if Enter is being held
             if (Input.GetKeyDown(KeyCode.Return))
@@ -293,6 +321,12 @@ public class DinoManager : MonoBehaviour
         else
         {
             resetScoreMode = false;
+            hold.SetActive(false);
+
+            if (isHoldingEnter == false)
+            {
+                dinoAnimations.StopResetScoreAnimation();
+            }
         }
     }
 
