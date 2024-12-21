@@ -6,6 +6,7 @@ public class DinoManager : MonoBehaviour
     private ScoreManager scoreManager;  // Manages the player's score
     private DinoDie dinoDie;  // Handles the Dino's death logic
     private DinoAnimations dinoAnimations;  // Controls animations for the Dino
+    private DinoVolume dinoVolume;
 
     // Serialized fields for various UI elements that can be configured in the Inspector
     [SerializeField]
@@ -14,6 +15,8 @@ public class DinoManager : MonoBehaviour
     private GameObject pause;  // Pause menu UI
     [SerializeField]
     private GameObject arrow;  // Arrow that moves in the menu
+    [SerializeField]
+    private GameObject gameWindow;  // Ui element for game window
     [SerializeField]
     private GameObject fullScreen;  // UI element for fullscreen mode
     [SerializeField]
@@ -49,12 +52,22 @@ public class DinoManager : MonoBehaviour
     private int windowedWidth;
     private int windowedHeight;
 
+    // Add a flag to ensure the sound plays only once
+    private bool hasPlayedVolSound = false;
+    private bool hasPlayedGWSound = false;
+    private bool hasPlayedRSSound = false;
+    private bool hasPlayedRSHSound = false;
+    private float pitchIncreaseRate = 0.1f;  // Rate at which pitch increases
+    private float maxPitch = 3.0f;  // Maximum pitch limit
+    private AudioSource rshAudioSource;  // AudioSource for RSH sound
+
     void Start()
     {
         // Initialize references to other game systems
         scoreManager = FindAnyObjectByType<ScoreManager>();
         dinoDie = FindAnyObjectByType<DinoDie>();
         dinoAnimations = FindAnyObjectByType<DinoAnimations>();
+        dinoVolume = FindAnyObjectByType<DinoVolume>();
 
         // Set initial game UI states
         title.SetActive(true);
@@ -127,11 +140,6 @@ public class DinoManager : MonoBehaviour
         if (isHoldingEnter)
         {
             enterHoldTime += Time.unscaledDeltaTime;  // Track how long Enter is held
-            if (enterHoldTime >= 3f && gameWindowMode)
-            {
-                ToggleFullscreen();  // Toggle fullscreen after 3 seconds
-                isHoldingEnter = false;  // Reset flag
-            }
             if (enterHoldTime >= 3f && resetScoreMode)
             {
                 ToggleResetScore();  // Reset score after 3 seconds
@@ -141,6 +149,16 @@ public class DinoManager : MonoBehaviour
             // Update reset score animation based on the time the Enter key has been held
             resetScoreImage.fillAmount = Mathf.Clamp01(enterHoldTime / 3f);
             dinoAnimations.PlayResetScoreShakeAnimation();
+
+            // Check if the sound has finished playing
+            if (!rshAudioSource.isPlaying)
+            {
+                // Increase pitch each time the sound ends, but don't exceed max pitch
+                rshAudioSource.pitch = Mathf.Min(rshAudioSource.pitch + pitchIncreaseRate, maxPitch);
+
+                // Play the sound again after it finishes
+                rshAudioSource.Play();
+            }
         }
 
         // Reset Enter key holding state when the key is released
@@ -152,12 +170,16 @@ public class DinoManager : MonoBehaviour
             // Reset the fill amount of the reset score image when the key is released
             resetScoreImage.fillAmount = 0f;
             dinoAnimations.PlayResetScoreAnimation();
+            if (rshAudioSource != null)
+            {
+                rshAudioSource.pitch = 1.5f;  // Reset pitch back to normal
+            }
         }
 
         // Single press of Enter to toggle fullscreen
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))
         {
-            if (gameWindowMode)  // Only toggle fullscreen if the arrow is at the correct position
+            if (isPaused && gameWindowMode)  // Only toggle fullscreen if the arrow is at the correct position
             {
                 ToggleFullscreen();
             }
@@ -169,6 +191,7 @@ public class DinoManager : MonoBehaviour
     {
         pause.SetActive(true);
         title.SetActive(false);
+        gameWindow.SetActive(true);
         fullScreen.SetActive(!Screen.fullScreen);
         windowed.SetActive(Screen.fullScreen);
         resetScore.SetActive(true);
@@ -181,6 +204,7 @@ public class DinoManager : MonoBehaviour
     {
         pause.SetActive(false);
         arrow.SetActive(false);
+        gameWindow.SetActive(false);
         fullScreen.SetActive(false);
         windowed.SetActive(false);
         resetScore.SetActive(false);
@@ -269,11 +293,20 @@ public class DinoManager : MonoBehaviour
         {
             canAdjustVolume = true;
             dinoAnimations.PlayVolumeAnimation();
+            
+            // Only play the sound if it hasn't been played yet
+            if (!hasPlayedVolSound)
+            {
+                AudioSource audioSource = dinoVolume.audioSources[dinoVolume.audioSources.Length - 4];
+                audioSource.Play();
+                hasPlayedVolSound = true;  // Mark the sound as played
+            }
         }
         else
         {
             canAdjustVolume = false;
             dinoAnimations.StopVolumeAnimation();
+            hasPlayedVolSound = false;  // Reset the flag when the arrow position changes
         }
     }
 
@@ -285,12 +318,21 @@ public class DinoManager : MonoBehaviour
             gameWindowMode = true;
             dinoAnimations.PlayFullscreenAnimation();
             dinoAnimations.PlayWindowedAnimation();
+
+            // Only play the sound if it hasn't been played yet
+            if (!hasPlayedGWSound)
+            {
+                AudioSource audioSource = dinoVolume.audioSources[dinoVolume.audioSources.Length - 3];
+                audioSource.Play();
+                hasPlayedGWSound = true;  // Mark the sound as played
+            }
         }
         else
         {
             gameWindowMode = false;
             dinoAnimations.StopFullscreenAnimation();
             dinoAnimations.StopWindowedAnimation();
+            hasPlayedGWSound = false;  // Reset the flag when the arrow position changes
         }
     }
 
@@ -322,6 +364,14 @@ public class DinoManager : MonoBehaviour
             resetScoreMode = true;
             hold.SetActive(true);
 
+            // Only play the sound if it hasn't been played yet
+            if (!hasPlayedRSSound)
+            {
+                AudioSource audioSource = dinoVolume.audioSources[dinoVolume.audioSources.Length - 2];
+                audioSource.Play();
+                hasPlayedRSSound = true;  // Mark the sound as played
+            }
+
             if (!isHoldingEnter)
             {
                 dinoAnimations.PlayResetScoreAnimation();
@@ -331,17 +381,26 @@ public class DinoManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0))
             {
                 isHoldingEnter = true;
+                // Only play the sound if it hasn't been played yet
+                if (!hasPlayedRSHSound)
+                {
+                    rshAudioSource = dinoVolume.audioSources[dinoVolume.audioSources.Length - 1];
+                    rshAudioSource.Play();
+                    hasPlayedRSHSound = true;  // Mark the sound as played
+                }
             }
         }
         else
         {
             resetScoreMode = false;
             hold.SetActive(false);
+            hasPlayedRSSound = false;  // Reset the flag when the arrow position changes
 
             // Stop reset score animation if not holding Enter
             if (!isHoldingEnter)
             {
                 dinoAnimations.StopResetScoreAnimation();
+                hasPlayedRSHSound = false;  // Reset the flag when the arrow position changes
             }
         }
     }
