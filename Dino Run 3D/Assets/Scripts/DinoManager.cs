@@ -411,5 +411,7 @@ public class DinoManager : MonoBehaviour
         PlayerPrefs.DeleteKey("HighScore");  // Delete the saved high score
         scoreManager.ResetScore();  // Reset the current score
         scoreManager.highScore = 0;  // Set high score to 0
+        scoreManager.isGameActive = false;
+        scoreManager.UpdateScore();
     }
 }

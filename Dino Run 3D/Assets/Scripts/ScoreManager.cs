@@ -6,7 +6,7 @@ public class ScoreManager : MonoBehaviour
     private float startTime;
     private int currentScore;
     public int highScore;
-    private bool isGameActive;
+    public bool isGameActive;
     public bool hasStarted; // Track if scoring has started
 
     void Start()
